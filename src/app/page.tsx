@@ -1,65 +1,92 @@
+import Link from "next/link";
 import Image from "next/image";
+
+const STEPS = [
+  {
+    n: "01",
+    title: "Tell us your stack",
+    body: "Microsoft or Google? Then tick the tools your team actually uses.",
+  },
+  {
+    n: "02",
+    title: "Map your teams",
+    body: "Add your departments and mark which tools each one relies on.",
+  },
+  {
+    n: "03",
+    title: "See your graph",
+    body: "An interactive knowledge graph of your business, plus an instant audit of where context is scattered.",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-black text-white">
+      <div className="max-w-5xl mx-auto px-6 md:px-10">
+        {/* Nav */}
+        <header className="py-6 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <Image src="/sentry-logo.png" alt="Sentry AI" width={30} height={30} className="rounded-md" />
+            <span className="font-semibold tracking-tight">Sentry AI</span>
+          </div>
+          <Link
+            href="/audit"
+            className="text-sm text-white/70 hover:text-white border border-white/15 rounded-lg px-3.5 py-1.5"
+          >
+            Start audit
+          </Link>
+        </header>
+
+        {/* Hero */}
+        <section className="py-20 md:py-32 flex flex-col items-center text-center">
+          <div className="text-xs uppercase tracking-[0.2em] text-white/45 mb-5">
+            Free knowledge graph audit
+          </div>
+          <h1 className="text-4xl md:text-6xl font-semibold max-w-3xl leading-[1.05]">
+            See where your business context actually lives
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-white/55 mt-6 max-w-xl text-lg">
+            Answer a few questions about your tools and teams. We turn them into an
+            interactive knowledge graph, and show you where your context is
+            scattered, siloed, and ready to connect.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+          <div className="mt-9 flex flex-col sm:flex-row items-center gap-3">
+            <Link
+              href="/audit"
+              className="px-7 py-3.5 rounded-xl bg-white text-black font-semibold hover:bg-white/90 transition-colors"
+            >
+              Map my business, it&apos;s free
+            </Link>
+            <Link
+              href="/audit?example=1"
+              className="px-7 py-3.5 rounded-xl border border-white/20 text-white font-medium hover:bg-white/5 transition-colors"
+            >
+              Create example knowledge graph
+            </Link>
+          </div>
+          <p className="text-xs text-white/35 mt-3">Takes about 2 minutes · No signup</p>
+        </section>
+
+        {/* How it works */}
+        <section className="pb-28">
+          <div className="grid md:grid-cols-3 gap-5">
+            {STEPS.map((s) => (
+              <div
+                key={s.n}
+                className="rounded-2xl border border-white/10 bg-white/[0.02] p-6"
+              >
+                <div className="text-white/40 font-mono text-sm">{s.n}</div>
+                <div className="text-lg font-semibold text-white mt-2">{s.title}</div>
+                <p className="text-white/50 text-sm mt-1.5 leading-relaxed">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <footer className="pb-10 text-xs text-white/30">
+          A free tool by Sentry AI. Your answers stay in your browser.
+        </footer>
+      </div>
+    </main>
   );
 }
