@@ -90,12 +90,15 @@ export default function KnowledgeGraph({ data }: { data: GraphData }) {
       const fg = fgRef.current;
       tries++;
       if (fg?.d3Force) {
-        fg.d3Force("charge")?.strength(-78);
+        // The structural nodes are pinned (radial wheel) in build-graph, so the
+        // simulation only relaxes the context dots. Keep charge gentle and the
+        // context link short/stiff so each tool gets a tight, clean halo.
+        fg.d3Force("charge")?.strength(-26);
         const link = fg.d3Force("link");
         if (link) {
           link.distance((l: PaintLink) =>
             l.kind === "context"
-              ? 36
+              ? 26
               : l.kind === "access"
                 ? 66
                 : l.kind === "tool" || l.kind === "shared"
@@ -104,9 +107,9 @@ export default function KnowledgeGraph({ data }: { data: GraphData }) {
           );
           link.strength((l: PaintLink) =>
             l.kind === "access"
-              ? 0.03
+              ? 0.02
               : l.kind === "context"
-                ? 0.2
+                ? 0.45
                 : l.kind === "tool" || l.kind === "shared"
                   ? 0.5
                   : 0.35,

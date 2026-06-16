@@ -99,6 +99,18 @@ export const TOOL_BY_ID: Record<string, Tool> = Object.fromEntries(
   TOOL_CATALOG.map((t) => [t.id, t]),
 );
 
+/** AI subscriptions offered in the onboarding (step 2). `domain` powers the logo. */
+export const AI_TOOLS: { id: string; label: string; domain: string }[] = [
+  { id: "copilot", label: "Microsoft Copilot", domain: "copilot.microsoft.com" },
+  { id: "claude", label: "Claude", domain: "claude.ai" },
+  { id: "chatgpt", label: "ChatGPT", domain: "chatgpt.com" },
+  { id: "gemini", label: "Google Gemini", domain: "gemini.google.com" },
+];
+
+export const AI_TOOL_LABEL: Record<string, string> = Object.fromEntries(
+  AI_TOOLS.map((a) => [a.id, a.label]),
+);
+
 /** Suggested departments to seed step 3. */
 export const DEPARTMENT_SUGGESTIONS = [
   "Sales",
@@ -161,6 +173,7 @@ export function contextFor(tool: Tool): string[] {
 export const EXAMPLE_AUDIT: AuditState = {
   company: "Northwind Group",
   ecosystem: "both",
+  aiTools: ["copilot", "claude"],
   toolIds: [
     "outlook", "teams", "sharepoint", "onedrive", "excel", "powerbi",
     "gmail", "gdrive", "gsheets", "looker",

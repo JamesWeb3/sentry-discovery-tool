@@ -134,6 +134,112 @@ export function buildGraph(
     }
   }
 
+  // ---- Radial "wheel" layout ---------------------------------------------
+  // Pin the structural nodes into clean concentric rings so the graph reads as
+  // an orchestrated wheel instead of an organic (overlapping) cloud: company at
+  // the hub, ecosystems/departments on inner rings, each department's own tools
+  // fanned into its angular wedge, widely-shared tools on a ring between the
+  // departments, and the tiny context dots left to halo their tool.
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const pin = (id: string, r: number, a: number) => {
+    const n = byId.get(id);
+    if (!n) return;
+    n.x = n.fx = Math.cos(a) * r;
+    n.y = n.fy = Math.sin(a) * r;
+  };
+  const TOP = -Math.PI / 2; // first spoke points to 12 o'clock
+
+  pin(companyId, 0, 0);
+
+  const deptN = Math.max(1, state.departments.length);
+  const deptAngle = new Map<string, number>();
+  state.departments.forEach((d, i) => {
+    const a = TOP + (2 * Math.PI * i) / deptN;
+    deptAngle.set(d.id, a);
+    pin(`dept:${d.id}`, 210, a);
+  });
+
+  ecosystems.forEach((eco, i) => {
+    pin(`eco:${eco}`, 95, TOP + (2 * Math.PI * (i + 0.5)) / ecosystems.length);
+  });
+
+  // Which departments touch each tool
+  const toolDepts = new Map<string, string[]>();
+  for (const d of state.departments) {
+    for (const tid of d.toolIds) {
+      const arr = toolDepts.get(tid) ?? [];
+      arr.push(d.id);
+      toolDepts.set(tid, arr);
+    }
+  }
+
+  const singleByDept = new Map<string, string[]>();
+  const sharedTools: string[] = [];
+  for (const [tid, ds] of toolDepts) {
+    if (ds.length === 1) {
+      const arr = singleByDept.get(ds[0]) ?? [];
+      arr.push(tid);
+      singleByDept.set(ds[0], arr);
+    } else {
+      sharedTools.push(tid);
+    }
+  }
+
+  // A department's own tools fan out across its wedge, just past the dept node.
+  const halfWedge = (Math.PI / deptN) * 0.85;
+  for (const [dId, tids] of singleByDept) {
+    const base = deptAngle.get(dId) ?? TOP;
+    tids.forEach((tid, j) => {
+      const a =
+        tids.length === 1
+          ? base
+          : base - halfWedge + (2 * halfWedge * j) / (tids.length - 1);
+      pin(`tool:${tid}`, 360, a);
+    });
+  }
+
+  // Shared tools sit on a ring between the departments. Order them by the mean
+  // angle of the departments that use them, then space them evenly so that
+  // near-universal tools (whose mean angle is ambiguous) never pile up.
+  const meanAngle = (ids: string[]) => {
+    let sx = 0;
+    let sy = 0;
+    for (const id of ids) {
+      const a = deptAngle.get(id) ?? 0;
+      sx += Math.cos(a);
+      sy += Math.sin(a);
+    }
+    return Math.atan2(sy, sx);
+  };
+  sharedTools
+    .sort((a, b) => meanAngle(toolDepts.get(a)!) - meanAngle(toolDepts.get(b)!))
+    .forEach((tid, i) => {
+      pin(`tool:${tid}`, 300, TOP + (2 * Math.PI * i) / sharedTools.length);
+    });
+
+  // Tools selected but never mapped to a team float on the outer ring.
+  const unmapped = state.toolIds.filter((t) => !deptCount.has(t));
+  unmapped.forEach((tid, i) => {
+    pin(`tool:${tid}`, 415, TOP + (2 * Math.PI * i) / Math.max(1, unmapped.length));
+  });
+
+  // Seed context dots in a tight phyllotaxis spiral around their tool so the
+  // force pass only has to relax them into a clean halo (they stay unpinned).
+  const ctxSeen = new Map<string, number>();
+  const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+  for (const n of nodes) {
+    if (n.type !== "context") continue;
+    const rest = n.id.slice(4); // drop "ctx:"
+    const toolId = rest.slice(0, rest.lastIndexOf(":"));
+    const parent = byId.get(`tool:${toolId}`);
+    if (parent?.fx == null || parent.fy == null) continue;
+    const k = ctxSeen.get(toolId) ?? 0;
+    ctxSeen.set(toolId, k + 1);
+    const rr = 6 + 3.2 * Math.sqrt(k);
+    n.x = parent.fx + Math.cos(k * GOLDEN) * rr;
+    n.y = parent.fy + Math.sin(k * GOLDEN) * rr;
+  }
+
   // ---- Insights ----
   const toolCount = new Set([...state.toolIds, ...deptCount.keys()]).size;
   const departmentCount = state.departments.length;

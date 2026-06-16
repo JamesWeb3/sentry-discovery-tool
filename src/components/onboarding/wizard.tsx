@@ -7,6 +7,7 @@ import {
   CATEGORY_ORDER,
   DEPARTMENT_SUGGESTIONS,
   EXAMPLE_AUDIT,
+  AI_TOOLS,
 } from "@/lib/catalog";
 import type { AuditState, Department, Ecosystem, Tool } from "@/lib/types";
 
@@ -23,8 +24,8 @@ const ECOSYSTEMS: { id: Ecosystem; label: string; hint: string; domain?: string 
   { id: "both", label: "A mix of both", hint: "Microsoft and Google" },
 ];
 
-const STEP_LABELS = ["Ecosystem", "Tools", "Teams", "Mapping"];
-const TOTAL = 4;
+const STEP_LABELS = ["Ecosystem", "AI", "Tools", "Teams", "Mapping"];
+const TOTAL = 5;
 
 function favicon(domain: string, size = 64) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
@@ -38,6 +39,7 @@ export default function Wizard({
   const [step, setStep] = useState(0);
   const [company, setCompany] = useState("");
   const [ecosystem, setEcosystem] = useState<Ecosystem | null>(null);
+  const [aiTools, setAiTools] = useState<string[]>([]);
   const [toolIds, setToolIds] = useState<string[]>([]);
   const [extraTools, setExtraTools] = useState<Tool[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -67,6 +69,9 @@ export default function Wizard({
 
   const toggleTool = (id: string) =>
     setToolIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const toggleAiTool = (id: string) =>
+    setAiTools((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const addCustomTool = () => {
     const name = customTool.trim();
@@ -121,12 +126,16 @@ export default function Wizard({
 
   const canNext =
     (step === 0 && !!ecosystem) ||
-    (step === 1 && toolIds.length > 0) ||
-    (step === 2 && departments.length > 0) ||
-    step === 3;
+    step === 1 ||
+    (step === 2 && toolIds.length > 0) ||
+    (step === 3 && departments.length > 0) ||
+    step === 4;
 
   const finish = () =>
-    onComplete({ company, ecosystem: ecosystem ?? "both", toolIds, departments }, extraTools);
+    onComplete(
+      { company, ecosystem: ecosystem ?? "both", toolIds, departments, aiTools },
+      extraTools,
+    );
 
   const Chip = ({
     active,
@@ -242,8 +251,44 @@ export default function Wizard({
         </div>
       )}
 
-      {/* Step 1 — tools */}
+      {/* Step 1 — AI subscriptions */}
       {step === 1 && (
+        <div className="flex flex-col gap-6">
+          <div>
+            <h2 className="text-3xl font-semibold text-white tracking-tight">
+              What AI subscription are you currently using?
+            </h2>
+            <p className="text-white/50 mt-2">
+              Tap any your team has today. Skip if you&apos;re not using one yet.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {AI_TOOLS.map((ai) => {
+              const active = aiTools.includes(ai.id);
+              return (
+                <button
+                  key={ai.id}
+                  type="button"
+                  onClick={() => toggleAiTool(ai.id)}
+                  className={`text-left rounded-2xl border p-4 flex items-center gap-3 transition-all ${
+                    active
+                      ? "border-white bg-white/[0.08]"
+                      : "border-white/12 bg-white/[0.03] hover:border-white/30"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={favicon(ai.domain, 128)} alt="" width={28} height={28} className="rounded" />
+                  <div className="font-semibold text-white text-sm">{ai.label}</div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-white/40">{aiTools.length} selected</p>
+        </div>
+      )}
+
+      {/* Step 2 — tools */}
+      {step === 2 && (
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-3xl font-semibold text-white tracking-tight">Which tools does your team use?</h2>
@@ -287,8 +332,8 @@ export default function Wizard({
         </div>
       )}
 
-      {/* Step 2 — departments */}
-      {step === 2 && (
+      {/* Step 3 — departments */}
+      {step === 3 && (
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-3xl font-semibold text-white tracking-tight">What are your departments?</h2>
@@ -339,8 +384,8 @@ export default function Wizard({
         </div>
       )}
 
-      {/* Step 3 — mapping */}
-      {step === 3 && (
+      {/* Step 4 — mapping */}
+      {step === 4 && (
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-3xl font-semibold text-white tracking-tight">Who uses what?</h2>

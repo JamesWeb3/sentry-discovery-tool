@@ -36,6 +36,8 @@ export interface AuditState {
   /** All tool ids the organisation uses (selected in step 2). */
   toolIds: string[];
   departments: Department[];
+  /** AI subscriptions the organisation currently uses (ids from AI_TOOLS). */
+  aiTools?: string[];
 }
 
 export type NodeType = "company" | "ecosystem" | "department" | "tool" | "context";
@@ -53,6 +55,9 @@ export interface GraphNode {
   deptCount?: number;
   /** Domain for the brand logo. */
   domain?: string;
+  /** Seed position fed to the force simulation (radial layout). */
+  x?: number;
+  y?: number;
   /** Pinned layout position (radial layout). */
   fx?: number;
   fy?: number;
