@@ -71,7 +71,12 @@ export default function Wizard({
     setToolIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   const toggleAiTool = (id: string) =>
-    setAiTools((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setAiTools((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      // "No AI tools" is mutually exclusive with any actual tool.
+      if (id === "none") return ["none"];
+      return [...prev.filter((x) => x !== "none"), id];
+    });
 
   const addCustomTool = () => {
     const name = customTool.trim();
@@ -133,7 +138,13 @@ export default function Wizard({
 
   const finish = () =>
     onComplete(
-      { company, ecosystem: ecosystem ?? "both", toolIds, departments, aiTools },
+      {
+        company,
+        ecosystem: ecosystem ?? "both",
+        toolIds,
+        departments,
+        aiTools: aiTools.filter((x) => x !== "none"),
+      },
       extraTools,
     );
 
@@ -282,8 +293,24 @@ export default function Wizard({
                 </button>
               );
             })}
+            <button
+              type="button"
+              onClick={() => toggleAiTool("none")}
+              className={`text-left rounded-2xl border p-4 flex items-center gap-3 transition-all ${
+                aiTools.includes("none")
+                  ? "border-white bg-white/[0.08]"
+                  : "border-white/12 bg-white/[0.03] hover:border-white/30"
+              }`}
+            >
+              <span className="flex items-center justify-center w-7 h-7 rounded bg-white/[0.06] text-white/50 text-base">
+                ✕
+              </span>
+              <div className="font-semibold text-white text-sm">No AI tools yet</div>
+            </button>
           </div>
-          <p className="text-xs text-white/40">{aiTools.length} selected</p>
+          <p className="text-xs text-white/40">
+            {aiTools.filter((x) => x !== "none").length} selected
+          </p>
         </div>
       )}
 
