@@ -1,5 +1,5 @@
 {
-  "name": "sentry-knowledge-graph-audit",
+  "name": "sentry-discovery-tool",
   "version": "0.1.0",
   "private": true,
   "scripts": {

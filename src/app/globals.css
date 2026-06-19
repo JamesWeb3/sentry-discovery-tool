@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
+@theme inline {
+  /* Site main dark background. Remaps `bg-black` (used app-wide) to #0a0a0b
+     to match the main Sentry AI website. */
+  --color-black: #0a0a0b;
+}
+
 :root {
   color-scheme: dark;
 }
 
 html,
 body {
-  background: #000000;
+  background: #0a0a0b;
 }
 
 body {

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Wizard from "@/components/onboarding/wizard";
 import KnowledgeGraph from "@/components/graph/knowledge-graph";
 import { buildGraph } from "@/lib/build-graph";
@@ -58,6 +59,14 @@ export default function AuditPage() {
 
   const [suggestions, setSuggestions] = useState<AiSuggestion[] | null>(null);
   const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
+
+  const router = useRouter();
+
+  // Hand the audit to the chat screen (no backend), then navigate.
+  const openChat = () => {
+    if (audit) sessionStorage.setItem("sentry:audit", JSON.stringify(audit));
+    router.push("/chat");
+  };
 
   const run = useCallback((state: AuditState, extraTools: Tool[]) => {
     setResult(buildGraph(state, extraTools));
@@ -137,12 +146,20 @@ export default function AuditPage() {
                   your business context lives today.
                 </p>
               </div>
-              <button
-                onClick={reset}
-                className="text-sm text-white/50 hover:text-white border border-white/15 rounded-lg px-3 py-1.5"
-              >
-                Start over
-              </button>
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={reset}
+                  className="text-sm text-white/50 hover:text-white border border-white/15 rounded-lg px-3 py-1.5"
+                >
+                  Start over
+                </button>
+                <button
+                  onClick={openChat}
+                  className="text-sm font-medium bg-white text-black rounded-lg px-4 py-1.5 hover:bg-white/90 transition-colors"
+                >
+                  Chat with your stack →
+                </button>
+              </div>
             </div>
 
             <KnowledgeGraph data={result.graph} />
