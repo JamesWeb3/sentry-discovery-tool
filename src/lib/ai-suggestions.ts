@@ -10,6 +10,17 @@ export const SUGGESTION_CATEGORIES = [
 
 export type SuggestionCategory = (typeof SUGGESTION_CATEGORIES)[number];
 
+export const OUTCOME_TYPES = [
+  "Save time",
+  "Increase revenue",
+  "Save money",
+  "Reduce risk",
+  "Better decisions",
+  "Team alignment",
+] as const;
+
+export type OutcomeType = (typeof OUTCOME_TYPES)[number];
+
 export interface AiSuggestion {
   /** The primary Sentry pillar this recommendation is delivered under. */
   category: SuggestionCategory;
@@ -19,6 +30,8 @@ export interface AiSuggestion {
   rationale: string;
   /** The concrete first move to get it started. */
   firstStep: string;
+  /** 1-3 outcome tags describing the business value this recommendation delivers. */
+  outcomes?: OutcomeType[];
 }
 
 const ECOSYSTEM_LABEL: Record<string, string> = {
@@ -105,8 +118,10 @@ HOW TO RECOMMEND:
 - Use the signals in the data: heavily shared tools are natural places to centralise context; tools owned by no department are ungoverned risk; large tool sprawl in one department is an automation opportunity.
 - Be concrete and specific. No generic AI platitudes. Every "firstStep" must be a real first action Sentry would take.
 
+OUTCOME TAGS: For each suggestion, also return an "outcomes" array of 1-3 short strings chosen from EXACTLY this list (match case exactly): "Save time", "Increase revenue", "Save money", "Reduce risk", "Better decisions", "Team alignment". Choose whichever best describe what this recommendation actually delivers to the business. Examples: a time-saving automation → "Save time"; connecting sales data → "Increase revenue" + "Better decisions"; consolidating duplicate tools → "Save money".
+
 Respond with ONLY a JSON object of the form:
-{"suggestions": [{"category": "Enablement" | "Development" | "Infrastructure", "title": string, "rationale": string, "firstStep": string}]}`;
+{"suggestions": [{"category": "Enablement" | "Development" | "Infrastructure", "title": string, "rationale": string, "firstStep": string, "outcomes": string[]}]}`;
 
 /** Render the audit summary into the user-turn prompt. */
 export function buildUserPrompt(summary: AuditSummary): string {

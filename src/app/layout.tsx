@@ -1,5 +1,19 @@
 import type { Metadata } from "next";
+import { Geist, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Sentry · Free Knowledge Graph Audit",
@@ -13,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className={`h-full ${geist.variable} ${instrumentSerif.variable}`}>
       <body className="min-h-full antialiased">{children}</body>
     </html>
   );

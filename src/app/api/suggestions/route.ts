@@ -3,6 +3,7 @@ import {
   buildUserPrompt,
   summarizeAudit,
   SUGGESTION_CATEGORIES,
+  OUTCOME_TYPES,
   type AiSuggestion,
 } from "@/lib/ai-suggestions";
 import type { AuditState, Tool } from "@/lib/types";
@@ -88,6 +89,13 @@ export async function POST(request: Request) {
         typeof s.rationale === "string" &&
         typeof s.firstStep === "string",
     )
+    .map((s) => {
+      const validOutcomes = Array.isArray(s.outcomes)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? s.outcomes.filter((o: any) => OUTCOME_TYPES.includes(o)) as AiSuggestion["outcomes"]
+        : undefined;
+      return { ...s, outcomes: validOutcomes };
+    })
     .slice(0, 3);
 
   if (suggestions.length === 0) {

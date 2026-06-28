@@ -4,30 +4,86 @@ export const dynamic = "force-dynamic";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
+interface ToolInfo {
+  name: string;
+  category: string;
+}
+
 interface ChatContext {
   company?: string;
   ecosystem?: string;
+  activeAi?: string;
+  tools?: ToolInfo[];
+  // legacy — kept for backwards-compat with older clients
   aiSubscriptions?: string[];
-  tools?: string[];
+}
+
+// Per-category descriptions of what data lives in each tool type.
+const CATEGORY_DATA: Record<string, string> = {
+  "Comms":         "messages, threads, meeting transcripts, channel history, internal announcements",
+  "CRM & Sales":   "deals, pipeline stages, contact records, activity logs, forecast data, call notes",
+  "Finance":       "invoices, revenue data, expense records, cashflow, subscription MRR/ARR, payment history",
+  "Marketing":     "campaign performance, ad spend, engagement metrics, audience segments, email analytics",
+  "Project & Ops": "tasks, project timelines, milestones, team workload, sprint velocity, blockers",
+  "Support":       "tickets, CSAT scores, resolution times, common issues, customer sentiment",
+  "Data":          "analytics, dashboards, event tracking, funnel metrics, cohort data, SQL queries",
+  "Storage":       "documents, file history, shared drives, version control, knowledge base articles",
+  "HR":            "employee records, org structure, headcount, onboarding status, performance data",
+  "Other":         "integrations, automation logs, developer activity, e-commerce orders",
+};
+
+function toolDescription(t: ToolInfo): string {
+  const dataTypes = CATEGORY_DATA[t.category] ?? "business data";
+  return `${t.name} (${t.category} — contains ${dataTypes})`;
 }
 
 function systemPrompt(ctx: ChatContext): string {
-  const company = ctx.company?.trim() || "the business";
-  const subs = ctx.aiSubscriptions?.length
-    ? ctx.aiSubscriptions.join(", ")
-    : "none selected";
-  const tools = ctx.tools?.length ? ctx.tools.join(", ") : "none selected";
+  const company = ctx.company?.trim() || "this business";
+  const ai = ctx.activeAi || "an AI agent";
+  const tools = ctx.tools ?? [];
 
-  return `You are Sentry Assistant, the AI coworker from Sentry AI (Sentry AIOS). You help ${company} get more out of their tools and the AI subscriptions they already pay for, and you understand how Sentry connects a company's scattered tools into a single knowledge graph with AI agents that act across that data under role-based permissions.
+  const toolBlock =
+    tools.length > 0
+      ? tools.map((t) => `- ${toolDescription(t)}`).join("\n")
+      : null;
 
-The user has pinned the following context for this conversation:
-- Office ecosystem: ${ctx.ecosystem || "unspecified"}
-- AI subscriptions in use: ${subs}
-- Tools they want you to focus on right now: ${tools}
+  const noToolsNote = !toolBlock
+    ? `No specific tools are connected in this session. Give thoughtful strategic answers about AI in the workplace, and reference how connecting their tools into a knowledge graph would unlock deeper insights.`
+    : "";
 
-Ground your answers in those specific tools and AI subscriptions whenever relevant — name them. When recommending AI plays, prefer ones that leverage the subscriptions they already have. Frame bigger initiatives in terms of Sentry's three pillars (Enablement, Development, Infrastructure) when it helps.
+  return `You are a live ${ai} agent, running inside Sentry AIOS — an AI operating system that gives ${company} a single intelligent layer across their entire software stack.
 
-Style: warm, concrete, and practical. Keep answers tight. Use short paragraphs and simple hyphen ("- ") bullet lists. Do NOT use markdown symbols like **, ##, or backticks — write clean, readable prose that renders well as plain text.`;
+${toolBlock ? `You have authenticated, real-time read access to the following tools:\n${toolBlock}` : ""}
+
+${noToolsNote}
+
+YOUR ROLE IN THIS DEMO:
+You are demonstrating to ${company} what becomes possible when every tool is connected into a single knowledge graph. Your goal is to create "aha moments" — the kind of cross-tool insight that would have taken a human hours of tab-switching to compile, delivered instantly by the agent.
+
+HOW TO RESPOND:
+${toolBlock ? `
+1. Reason across ALL connected tools. Every answer should draw from at least 2-3 of them. This is the whole point — cross-tool intelligence that no single tool could produce on its own.
+
+2. Name the tools explicitly as you reason. Use phrases like:
+   "Looking at [Tool]..." / "Crossing this with [Tool]..." / "[Tool] shows..." / "When I combine [Tool A] and [Tool B]..."
+
+3. Include specific, plausible data. Invent realistic numbers, names, dates, and metrics that make the response feel like a real live connection. Examples: deal amounts, ticket counts, response times, campaign ROI %, team names, dates. Make it feel real.
+
+4. Surface cross-tool insights that couldn't exist without integration. The most powerful answers are ones where insight only emerges when you correlate two tools — e.g. Slack message volume spiking correlating with Salesforce deal slippage, or Stripe churn correlating with Zendesk ticket spikes.
+
+5. End with one sharp follow-up question or observation that makes the user want to dig deeper.
+` : `
+1. Give practical, strategic answers about AI in the workplace.
+2. Reference which tools would ideally be connected to answer this question better.
+3. Explain concretely how a knowledge graph would transform the answer.
+`}
+
+TONE & FORMAT:
+- Confident, sharp, and specific. You have access to everything — act like it.
+- Short paragraphs (2-4 sentences max). Simple "- " bullet lists where helpful.
+- NO markdown symbols: no **, no ##, no backticks, no headers. Plain readable prose only.
+- Keep total response under 250 words unless the question genuinely requires more depth.
+- Never say you're making data up or that this is a simulation. Respond as if the connections are live.`;
 }
 
 export async function POST(request: Request) {

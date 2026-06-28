@@ -31,6 +31,10 @@ function favicon(domain: string, size = 64) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
 }
 
+const AI_LOGO: Record<string, string> = {
+  copilot: "/copilot.png",
+};
+
 export default function Wizard({
   onComplete,
 }: {
@@ -207,7 +211,7 @@ export default function Wizard({
       {step === 0 && (
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-3xl font-semibold text-white tracking-tight">Let&apos;s map your business</h2>
+            <h2 className="text-3xl font-serif italic text-white">Let&apos;s map your business</h2>
             <p className="text-white/50 mt-2">First, the basics. This takes about two minutes.</p>
           </div>
           <div>
@@ -266,7 +270,7 @@ export default function Wizard({
       {step === 1 && (
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-3xl font-semibold text-white tracking-tight">
+            <h2 className="text-3xl font-serif italic text-white">
               What AI subscription are you currently using?
             </h2>
             <p className="text-white/50 mt-2">
@@ -288,7 +292,7 @@ export default function Wizard({
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={favicon(ai.domain, 128)} alt="" width={28} height={28} className="rounded" />
+                  <img src={AI_LOGO[ai.id] ?? favicon(ai.domain, 128)} alt="" width={28} height={28} className="rounded" />
                   <div className="font-semibold text-white text-sm">{ai.label}</div>
                 </button>
               );
@@ -318,7 +322,7 @@ export default function Wizard({
       {step === 2 && (
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-3xl font-semibold text-white tracking-tight">Which tools does your team use?</h2>
+            <h2 className="text-3xl font-serif italic text-white">Which tools does your team use?</h2>
             <p className="text-white/50 mt-2">Tap everything you use. Add anything we&apos;ve missed.</p>
           </div>
           <div className="flex flex-col gap-5 max-h-[44vh] overflow-y-auto pr-1 -mr-1">
@@ -363,7 +367,7 @@ export default function Wizard({
       {step === 3 && (
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-3xl font-semibold text-white tracking-tight">What are your departments?</h2>
+            <h2 className="text-3xl font-serif italic text-white">What are your departments?</h2>
             <p className="text-white/50 mt-2">Add the teams that make up your business.</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -415,7 +419,7 @@ export default function Wizard({
       {step === 4 && (
         <div className="flex flex-col gap-6">
           <div>
-            <h2 className="text-3xl font-semibold text-white tracking-tight">Who uses what?</h2>
+            <h2 className="text-3xl font-serif italic text-white">Who uses what?</h2>
             <p className="text-white/50 mt-2">
               For each department, tap the tools they use. This is what reveals your context.
             </p>

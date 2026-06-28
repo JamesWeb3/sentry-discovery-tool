@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Site main dark background. Remaps `bg-black` (used app-wide) to #0a0a0b
-     to match the main Sentry AI website. */
   --color-black: #0a0a0b;
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
 }
 
 :root {
@@ -13,14 +13,15 @@
 html,
 body {
   background: #0a0a0b;
-}
-
-body {
   color: #ffffff;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Inter, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
 }
 
 /* Blinking fake caret for the OTP input slots. */
